@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<button onclick=ac.resume()>Start</button>
+<button onclick=ac.suspend()>Stop</button>
 <script type=module>
 
 class Voice {
@@ -51,6 +53,7 @@ class Voice {
 }
 
 const ac = new AudioContext({ sampleRate: 192000 });
+window.ac = ac;
 
 const voice = new Voice(ac);
 voice.ready.then(() => {
