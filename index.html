@@ -52,7 +52,7 @@ class Voice {
   }
 }
 
-const ac = new AudioContext({ sampleRate: 192000 });
+const ac = new AudioContext();
 window.ac = ac;
 
 const voice = new Voice(ac);
