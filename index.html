@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<script type=module>
+
+class Voice {
+  constructor(ac, params = {}) {
+    this.out = ac.createGain();
+
+    this.params = {
+      "frequency": 313.323,
+      "N1": 0.5,
+      ...params,
+    };
+
+    this.ready = (async () => {
+      await Promise.all([
+        '/worklet/voiceWorklet.js',
+      ].map(f => ac.audioWorklet.addModule(f)));
+
+      const voiceNode = new AudioWorkletNode(ac, 'voice-source', { outputChannelCount: [1] });
+      this.tone = voiceNode.parameters.get('tone');
+      this.tone.value = 0.5;
+      this.frequency = voiceNode.parameters.get('frequency');
+      this.frequency.value = 440;
+
+      for (const freq of [1, 2.3, 0.7]) {
+        const voiceWobble = ac.createOscillator();
+        voiceWobble.frequency.value = freq;
+        voiceWobble.start();
+        const wobbleGain = ac.createGain();
+        voiceWobble.connect(wobbleGain);
+        wobbleGain.gain.value = 2;
+        wobbleGain.connect(this.frequency);
+      }
+
+      const voiceGain = ac.createGain();
+      // voiceGain.gain.value = 0;
+
+      this.voiceNode = voiceNode;
+      voiceNode.connect(voiceGain);
+      voiceGain.connect(this.out);
+
+      this.loudness = voiceGain.gain;
+
+      this.postConfig();
+    })();
+  }
+  postConfig() {
+    const params = this.params;
+    this.voiceNode.parameters.get('N1').value = params.N1;
+  }
+}
+
+const ac = new AudioContext({ sampleRate: 192000 });
+
+const voice = new Voice(ac);
+voice.ready.then(() => {
+  voice.out.connect(ac.destination);
+
+  voice.frequency.value = 110;
+});
+
+</script>
