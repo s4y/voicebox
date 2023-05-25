@@ -15,7 +15,7 @@ class Voice {
 
     this.ready = (async () => {
       await Promise.all([
-        '/worklet/voiceWorklet.js',
+        './worklet/voiceWorklet.js',
       ].map(f => ac.audioWorklet.addModule(f)));
 
       const voiceNode = new AudioWorkletNode(ac, 'voice-source', { outputChannelCount: [1] });
